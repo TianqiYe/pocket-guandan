@@ -12,6 +12,7 @@ class Table:
         self.difficulty=difficulty
         self.lang = language(lang)
         self.visible = False
+        self.remote = set()  # seats held by network guests
         self.deal = 0
         self.reset(seed)
 
@@ -211,9 +212,16 @@ class Table:
         self.sync()
 
     def tick(self):
-        if not self.visible or time.monotonic()<self.until: return
-        if self.match.phase == 'tribute' and self.match.actor != 0: self.tribute_action()
-        elif self.match.phase == 'play' and not self.game.over and self.game.turn != 0: self.play(self.game.bot_move(self.difficulty if self.game.turn % 2 else 'classic'))
+        # With guests connected the match keeps running while this window is hidden.
+        if not (self.visible or self.remote) or time.monotonic()<self.until: return
+        actor = self.match.actor
+        if actor is None or actor == 0 or actor in self.remote: return
+        if self.match.phase == 'tribute': self.tribute_action()
+        else: self.play(self.game.bot_move(self.bot_difficulty(actor)))
+
+    def bot_difficulty(self, seat):
+        """A human's bot partner plays Classic, so two humans get equal partners."""
+        return 'classic' if (seat + 2) % 4 in {0} | self.remote else self.difficulty
 
     def frame(self):
         from hand_view import render

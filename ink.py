@@ -1,7 +1,9 @@
 """Tiny grayscale canvas backed by system libcairo; export 1-bit LCD frames."""
-import ctypes as C, struct, zlib
+import ctypes as C, ctypes.util, struct, zlib
 from functools import lru_cache
-lib=C.CDLL('libcairo.so.2'); P=C.c_void_p; I=C.c_int; D=C.c_double; S=C.c_char_p
+try:lib=C.CDLL('libcairo.so.2')
+except OSError:lib=C.CDLL(ctypes.util.find_library('cairo') or '/opt/homebrew/lib/libcairo.2.dylib')
+P=C.c_void_p; I=C.c_int; D=C.c_double; S=C.c_char_p
 class Ext(C.Structure):
     _fields_=[(k,D) for k in ('x','y','w','h','dx','dy')]
 def bind(name,out,*args):

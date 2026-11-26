@@ -28,6 +28,18 @@ English is the default. For Chinese, run `python3 lcd_app.py --lang zh`. Keep th
 
 The app needs Python 3.10+, `dbus_fast`, system Cairo (`libcairo.so.2`), a suitable font (Noto Sans CJK SC for Chinese), and an account permitted to open Lapis display windows. The LCD launcher is device-specific; it isn't a desktop or browser game.
 
+## Multiplayer
+
+One Lapis hosts; up to three others take over bot seats over [tailcat](https://github.com/tailscale/tailcat). Lapis doesn't ship the `tailcat` CLI, so put a Linux arm64 build at `bin/tailcat` on each device (or anywhere on `PATH`).
+
+```sh
+python3 lcd_app.py --host                  # prints: python3 lcd_app.py --join <addr>
+python3 lcd_app.py --join <addr>           # first guest plays against the host
+python3 lcd_app.py --join <addr> --seat 1  # or pick a seat: 1 Right, 2 Partner, 3 Left
+```
+
+The host's device runs the match and checks every move; each guest only receives its own hand. Each human's bot partner plays Classic, so two humans get equal partners. A guest who disconnects is replaced by a bot and can rejoin. While guests are connected, the match keeps running when the host switches away. For LAN or local testing, use `--host --no-tailcat` and `--join tcp:HOST:7777`.
+
 ## Opponent difficulty
 
 **Hard** is the default for the two opponents. Your partner keeps the original Classic policy in both modes. The deal, level rules, tribute, and legal moves are identical; difficulty does not change the cards. To play the previous version's opponents, use:
